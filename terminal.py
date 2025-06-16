@@ -1,6 +1,6 @@
 command  = [""]
 directory= {
-  "website": [["Projects", "Experience", "Contact Info"], ["root"]],
+  "website": [["Projects", "Experience", "Contact_Info"], ["root"]],
   "root": [["website"], ["root"]],
   "Projects": [["p1", "p2", "p3"], ["website"]],
   "p1": [[], ["Projects"]],
@@ -10,7 +10,7 @@ directory= {
   "e1": [[], ["Experience"]],
   "e2": [[], ["Experience"]],
   "e2": [[], ["Experience"]],
-  "Contact Info": [[], ["website"]]
+  "Contact_Info": [[], ["website"]]
 }
 currentDirectory = "website"
 
@@ -45,5 +45,7 @@ while command[0] != "exit":
     print(f"{command[0]}: Command not supported")
   elif command[0] == "touch":
     print(f"{command[0]}: Command not supported")
+  elif command[0] == "exit":
+    break
   else:
     print("Command not recognized")
