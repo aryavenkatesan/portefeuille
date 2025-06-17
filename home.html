@@ -91,7 +91,7 @@
 
     <script>
            // ===== EVENTS CONFIGURATION (from CSV) =====
-    const GOOGLE_SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTbezT7IsJloqN0Ftgeka9GV2e-p7nNcV4x_QbwrLpdMULb6CWu9jdOBCHNlW1tuNGuMri0M7v0tRZq/pub?output=csv";
+    const GOOGLE_SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTvougmoccK6NOV7Ns0uZVXr9AAEOClHf_iOrsETZxMmc2dYWuDJTwa1DVt4AwwFTsfCrd8wFH8tZM-/pub?output=csv";
     let events = [];
 
     function showEventsFromCSV() {
@@ -107,60 +107,34 @@
     }
 
     function parseCSVData(csvText) {
-    const lines = csvText.trim().split('\n');
-    if (lines.length < 2) {
+        const lines = csvText.trim().split('\n');
+        if (lines.length < 2) {
+            events = [];
+            displayEvents();
+            return;
+        }
+        // For basic CSVs without embedded commas/quotes
         events = [];
-        displayEvents();
-        return;
-    }
-
-    events = [];
-    for (let i = 1; i < lines.length; i++) {
-        const line = lines[i].trim();
-        if (!line) continue;
-        // Use our robust CSV splitting
-        const values = csvSplitLine(line);
-
-        if (values.length >= 4) {
-            events.push({
-                id: i,
-                title: values[0] || '',
-                date: values[1] || '',
-                time: values[2] || '',
-                description: values[3] || ''
-            });
-        }
-    }
-    console.log("Parsed events:", events);
-    displayEvents();
-}
-
-// This function will properly respect commas, quotes, and spaces in CSV fields
-function csvSplitLine(line) {
-    const result = [];
-    let cur = '';
-    let inQuotes = false;
-
-    for (let i = 0; i < line.length; i++) {
-        const char = line[i];
-        if (char === '"') {
-            if (inQuotes && line[i + 1] === '"') {
-                cur += '"'; // Escaped quote
-                i++;
-            } else {
-                inQuotes = !inQuotes;
+        for (let i = 1; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (!line) continue;
+            // Handle possible quoted fields (handles simple CSVs)
+            const values = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g)?.map(x => x.replace(/^"|"$/g, '')) || [];
+            if (values.length >= 4) {
+                events.push({
+                    id: i,
+                    title: values[0] || '',
+                    date: values[1] || '',
+                    time: values[2] || '',
+                    description: values[3] || ''
+                });
             }
-        } else if (char === ',' && !inQuotes) {
-            result.push(cur);
-            cur = '';
-        } else {
-            cur += char;
         }
+        // DEBUG LOG - see exactly what is parsed!
+        // Remove this line in production!
+        console.log("Parsed events:", events);
+        displayEvents();
     }
-    result.push(cur);
-    // Remove leading/trailing quotes and whitespace for each value
-    return result.map(val => val.trim().replace(/^"(.*)"$/, '$1'));
-}
 
     // Call the CSV loader on page load
     showEventsFromCSV();
